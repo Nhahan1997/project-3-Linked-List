@@ -39,6 +39,7 @@ public:
 	myString (myString& B);		// non-default constructor
 	int Size();					// return size of array strArray
 	char* getWord();			// return strArray
+	bool operator == (myString& B);			// operator check if two myString object equal or not
 	myString& operator = (myString& B);		// assign myString object B to a myString object
 	myString& operator = (char* B);			// assign char B to a myString object
 
@@ -111,6 +112,20 @@ myString& myString::operator = (myString& B) {
 	return *this;				// return strArray, size of array
 }
 
+// checking if two myString objects are the same - return true or false
+bool myString::operator == (myString& B) {
+	if (B.size == size){					// check if two size is equal or not
+		for (int i = 0; i < size; i++){		// loop if is there any element is not equal, If so, return false
+			if (B.strArray[i] != strArray[i])
+				return false;
+		}
+	}
+	else	// if two size is not equal, return false
+		return false;
+	return true;	// if size equal and each element of two object equal, return true
+
+}
+
 // get one token from redirected input and return that string (alphanumeric)
 char* getNextToken () {
 	char* str = new char[50]; //assumes a max token size of 50
@@ -144,6 +159,7 @@ class webLinks {
 	protected:
 		myString URL;
 		int numLinks;
+		int a;
 		webLinks** hyperLinks;
 	public:
 		webLinks ();
@@ -162,7 +178,7 @@ ostream& operator << (ostream& s, webLinks& A)
     //TODO
 	s << A.URL << ":" << endl;
 	for(int i = 0; i < A.numLinks; i++){
-		s << "**" << *A.hyperLinks[i] << endl;
+		s << "** " << *A.hyperLinks[i] << endl;
 	}
 
 	return s;
@@ -173,6 +189,7 @@ webLinks::webLinks()
 {
     //TODO
 	numLinks = 0;
+	a = 0;
 	hyperLinks = new webLinks*[numLinks];
 
 }
@@ -183,6 +200,7 @@ webLinks::webLinks(myString& x, int n)
     //TODO
 	numLinks = n;
 	URL = x;
+	a = 0;
 	hyperLinks = new webLinks*[numLinks];
 }
 
@@ -203,8 +221,7 @@ int webLinks::getNumLinks()
 webLinks* webLinks::getHyperLink(int i)
 {
 	//TODO
-	webLinks* hyper = new webLinks(URL,i);
-	return hyper;
+	return hyperLinks[i];
 }
 
 //destructor
@@ -227,18 +244,25 @@ void webLinks::setNeighbors(int nei)
 {
     //TODO
 	numLinks = nei;
+	a = 0;
+//	if(*hyperLinks != NULL) delete[] *hyperLinks;
+//	for (int i = 0; i < nei; i ++){
+//		if (hyperLinks[i] != NULL)
+//			delete hyperLinks[i];
+//	}
+	hyperLinks = new webLinks*[nei];
 }
 
 //add the link at index neighbor to hyperLinks
 void webLinks::addNeighbor(webLinks& link)
 {
     //TODO
-	webLinks** tempHyper = new webLinks*[numLinks];		//memory allocate
-	*tempHyper[numLinks] = link;
-	hyperLinks = tempHyper;
-	++numLinks;
+//	webLinks** tempHyper = new webLinks*[numLinks];		//memory allocate
+//	*tempHyper[numLinks] = link;
+//	hyperLinks = tempHyper;
+//	++numLinks;
 
-//	*hyperLinks[numLinks++] = link;		//add and increment to size of hyperLinks
+	hyperLinks[a++] = &link;		//add and increment to size of hyperLinks
 }
 
 int main () {
@@ -253,7 +277,6 @@ int main () {
 
 	cin >> numSites;
     cout << "Number of websites: " << numSites << endl;
-    cout << "~~~~~WebLinks:" << endl;
 
 	webLinks* myWeb = new webLinks [numSites];
 	for (int i=0; i < numSites; i++)
@@ -266,6 +289,7 @@ int main () {
 		}
 
 	}
+	cout << "~~~~~WebLinks:" << endl;
 
     // store the neighbours/hyperlinks
 	for (int i = 0; i < numSites; i++)
@@ -288,6 +312,28 @@ int main () {
 
 	cout << "~~~~~Webpages contained as hyperLinks:" << endl;
     // display all the incoming nodes here
+	int x = 0;
+	while(x < numSites){
+		myString str = myWeb[x].getURL();
+		cout << str << ": ";
+		int a = 0;
+		for (int j = 0; j < numSites; j++){
+			for (int k = 0; k < myWeb[j].getNumLinks(); k++){
+				myString link = myWeb[j].getHyperLink(k)->getURL();
+				if (str == link)
+					a++;
+			}
+		}
+		cout << a << endl;
+		for (int j = 0; j < numSites; j++){
+			for (int k = 0; k < myWeb[j].getNumLinks(); k++){
+				myString link = myWeb[j].getHyperLink(k)->getURL();
+				if (str == link)
+					cout << "** " << link << endl;
+			}
+		}
+		x++;
+	}
 
 	delete [] myWeb;
 	delete tokenString;
